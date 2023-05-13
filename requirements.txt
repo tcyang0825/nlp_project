@@ -1,0 +1,11 @@
+hnswlib==0.7.0
+numpy==1.19.3
+paddle==1.0.2
+paddle_serving_client==0.9.0
+paddle_serving_server==0.9.0
+paddlenlp==2.5.2
+pandas==1.3.5
+pymilvus==2.2.8
+scipy==1.7.3
+streamlit==1.22.0
+tqdm==4.56.0
