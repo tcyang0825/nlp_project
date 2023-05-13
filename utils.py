@@ -1,5 +1,3 @@
-import streamlit as st
-
 import os
 import hnswlib
 
@@ -17,7 +15,6 @@ from paddlenlp.data import Pad, Tuple
 from paddlenlp.datasets import MapDataset
 from paddlenlp.transformers import AutoModel, AutoTokenizer
 from paddlenlp.utils.log import logger
-from utils import get_sentence_index
 
 params_path = "model/model_state.pdparams"
 
@@ -45,12 +42,21 @@ inner_model = model._layers
 final_index = hnswlib.Index(space="ip", dim=256)
 final_index.load_index("model/my_index.bin")
 
-st.header("HR gie gie is **_really_ cool**.:sparkling_heart:")
-st.markdown("This text is :red[colored red], and this is **:blue[colored]** and bold.")
-st.markdown(":green[the color] is the :mortar_board: of hr giegie")
 
-get_sentence_index(
-    sentence="just for test, replace this the develop.",
-    inner_model=inner_model,
-    final_index=final_index,
-)
+def get_sentence_index(sentence, inner_model, final_index):
+    tokenizer = AutoTokenizer.from_pretrained("rocketqa-zh-base-query-encoder")
+    encoded_inputs = tokenizer(text=[sentence], max_seq_len=128)
+    input_ids = encoded_inputs["input_ids"]
+    token_type_ids = encoded_inputs["token_type_ids"]
+    input_ids = paddle.to_tensor(input_ids, dtype="int64")
+    token_type_ids = paddle.to_tensor(token_type_ids, dtype="int64")
+    cls_embedding = inner_model.get_pooled_embedding(
+        input_ids=input_ids, token_type_ids=token_type_ids
+    )
+    # print('提取特征:{}'.format(cls_embedding))
+    recalled_idx, cosine_sims = final_index.knn_query(cls_embedding.numpy(), 10)
+    return recalled_idx
+
+
+# results = get_sentence_index("新加坡怎么找房子？", inner_model=inner_model, final_index=final_index)
+# print(results)
