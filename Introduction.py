@@ -2,7 +2,7 @@ import streamlit as st
 
 import os
 import hnswlib
-
+import csv
 import paddle
 from training.ann_util import build_index
 from training.data import (
@@ -17,7 +17,7 @@ from paddlenlp.data import Pad, Tuple
 from paddlenlp.datasets import MapDataset
 from paddlenlp.transformers import AutoModel, AutoTokenizer
 from paddlenlp.utils.log import logger
-from utils import get_sentence_index
+from utils import get_sentence
 
 params_path = "model/model_state.pdparams"
 
@@ -45,12 +45,28 @@ inner_model = model._layers
 final_index = hnswlib.Index(space="ip", dim=256)
 final_index.load_index("model/my_index.bin")
 
+
+
+
+# 打开csv文件
+import csv
+with open('data/qa_pair.csv', mode='r') as file:
+
+    # 使用csv模块创建reader对象
+    reader = csv.reader(file)
+
+    # 创建一个空字典
+    ans_dic = {}
+    ques_dic = {}
+    i = 0
+    # 遍历每一行，将第一列作为key，第二列作为value添加到字典中
+    for row in reader:
+        ans_dic[i] = row[1]
+        ques_dic[i] = row[0]
+        i += 1
+# print(my_dict)
+
 st.header("HR gie gie is **_really_ cool**.:sparkling_heart:")
 st.markdown("This text is :red[colored red], and this is **:blue[colored]** and bold.")
 st.markdown(":green[the color] is the :mortar_board: of hr giegie")
 
-get_sentence_index(
-    sentence="just for test, replace this the develop.",
-    inner_model=inner_model,
-    final_index=final_index,
-)
